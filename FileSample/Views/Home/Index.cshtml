@@ -1,0 +1,132 @@
+﻿<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@model  List<FileSample.Models.AttachmentListViewModel>
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <script src="~/Scripts/jquery-3.4.1.min.js"></script>
+    <title>Test</title>
+</head>
+<body>
+    <div class="row justify-content-center">
+
+        <div class="col-2">
+            <lable>
+                فایل
+            </lable>
+
+        </div>
+
+        <div class="form-group">
+            <input type="file" id="fileV" name="fileV" class="form-control" multiple />
+            @*<input type="file" id="VehicleImage" name="VehicleImage" class="dropify form-control" multiple />*@
+
+        </div>
+
+        <div id="output">
+
+            @{ 
+                foreach (var item in Model)
+                {
+                  <div style="display:inline-block" id="@item.Id">
+                      <img src="@item.path"/>
+                      <button onclick="DeleteImage(@item.Id)" style="font-size:24px;">
+                          <i class="fa fa-remove" style="font-size:24px; color:red"></i>
+                      </button>
+                  </div>
+                }
+            }
+            @*<div class="container" id="">
+                <img src=""/>
+                <div>
+                    <button onclick="" class="btn"><i class="fa fa-trash"></i>حذف</button>
+                </div>
+            </div>*@
+        </div>
+
+    </div>
+
+    <script>
+
+
+        $("#fileV").on("change", function () {
+            debugger
+
+            var ajaxData = new FormData();
+            var VImageFile = document.getElementById('fileV');
+            for (i = 0; i < VImageFile.files.length; i++) {
+                ajaxData.append("fileV", VImageFile.files[i]);
+                document.getElementById('fileV').value = "";
+                $.ajax({
+                    url: "/Home/CreateVehicleattachment",
+                    data: ajaxData,
+                    type: 'POST',
+                    //cache: false,
+                    // contentType: 'application/json; charset=utf-8',
+                    //dataType: "json",
+                    processData: false,
+                    contentType: false,
+                    success: function (result) {
+                        debugger
+                        if (result == 0) {
+                            swal("عملیات ناموفق بود. لطفا تمامی مقادیر را بدرستی وارد نمایید")
+                        }
+                         $("#VFile").click();
+
+                        var h = '<div style="display: inline-block" id="' + result.Id + '">';
+
+                        h += '<img src="' + result.Path + '">';
+                        h += '<button onclick="DeleteImage('+result.Id+')" style="font-size:24px"><i class="fa fa-remove" style="font-size:24px;color:red"></i></button>';
+                        h += '</div>';
+                        $("#output").append(h)
+                        //' + f +'
+                        //value="حذف"
+                        //var uplodaedFiles = ' <div style="display: inline-block" data-id="' + result.Id + '"><img src="' + result.Path + '" style="width: 100px; height: 100px;"/><input type="button" class="btn" value="حذف"' +
+                        //        ' onclick="' + f +'"/></div>';
+
+
+                        //    $("#output").append(uplodaedFiles);
+
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("عملیات ناموفق بود. لطفا تمامی مقادیر را بدرستی وارد نمایید")
+                    }
+                });
+            }
+
+        })
+
+        function DeleteImage(Id) {
+            debugger
+            var DivId = "body div#" + Id
+            //var element = document.querySelector(DivId);
+            $(DivId).remove()
+            $.ajax({
+                url: "/Home/DeleteVehicleattachment",
+                data: {Id : Id},
+                type: 'POST',
+                dataType: 'json',
+                success: function (result) {
+                    debugger
+                    if (result.status == 0) {
+                        alert("فایل وجود ندارد")
+                    }
+                    else {
+                        alert("عملیات موفق")
+                    }
+                    
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                   alert("خطا")
+                }
+            });
+           
+        }
+    </script>
+</body>
+</html>
